@@ -2,26 +2,102 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    
+    /* Main brand colors: Deep blue as primary */
+    --primary: 222 47% 31%;
+    --primary-foreground: 210 40% 98%;
+
+    /* Subtle blue-gray as secondary */
+    --secondary: 217 19% 97%;
+    --secondary-foreground: 222 47% 11%;
+    
+    /* Card and UI elements */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    
+    /* Muted elements */
+    --muted: 217 19% 97%;
+    --muted-foreground: 215 16% 47%;
+    
+    /* Accent colors */
+    --accent: 217 19% 97%;
+    --accent-foreground: 222 47% 11%;
+    
+    /* System colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    
+    /* Border and input styles */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 222 47% 31%;
+    
+    /* Chart/Visual colors */
+    --chart-1: 222 47% 31%;  /* Primary blue */
+    --chart-2: 201 96% 32%;  /* Accent blue */
+    --chart-3: 246 47% 50%;  /* Purple */
+    --chart-4: 168 77% 37%;  /* Teal */
+    --chart-5: 35 91% 62%;   /* Orange */
+    
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    
+    /* Darker theme adjustments */
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 11%;
+    
+    --secondary: 217 19% 27%;
+    --secondary-foreground: 210 40% 98%;
+    
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    
+    --muted: 217 19% 27%;
+    --muted-foreground: 215 20% 65%;
+    
+    --accent: 217 19% 27%;
+    --accent-foreground: 210 40% 98%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 217 19% 27%;
+    --input: 217 19% 27%;
+    --ring: 224 76% 48%;
+    
+    /* Dark mode chart colors */
+    --chart-1: 217 91% 60%;  /* Bright blue */
+    --chart-2: 199 89% 48%;  /* Cyan */
+    --chart-3: 246 70% 60%;  /* Bright purple */
+    --chart-4: 168 84% 45%;  /* Bright teal */
+    --chart-5: 35 91% 62%;   /* Orange */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
