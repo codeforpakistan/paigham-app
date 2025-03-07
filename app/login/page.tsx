@@ -16,18 +16,47 @@ import { Label } from "@/components/ui/label"
 import { Icons } from "@/components/ui/icons"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
+import { signIn } from "@/lib/auth"
+import { toast } from "@/components/ui/use-toast"
 
 export default function LoginPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [email, setEmail] = useState<string>("")
+  const [password, setPassword] = useState<string>("")
+  const [error, setError] = useState<string>("")
 
   async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault()
     setIsLoading(true)
+    setError("")
 
-    setTimeout(() => {
+    try {
+      if (!email || !password) {
+        throw new Error("Please enter both email and password")
+      }
+
+      const { session } = await signIn(email, password)
+      
+      if (session) {
+        toast({
+          title: "Login successful",
+          description: "Welcome back to Paigham!",
+        })
+        router.push("/dashboard")
+      } else {
+        throw new Error("Login failed. Please try again.")
+      }
+    } catch (error: any) {
+      setError(error.message || "Login failed. Please try again.")
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: error.message || "Please check your credentials and try again.",
+      })
+    } finally {
       setIsLoading(false)
-    }, 3000)
+    }
   }
 
   return (
@@ -57,66 +86,67 @@ export default function LoginPage() {
                 Enter your email and password to login
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4">
-              <div className="grid grid-cols-2 gap-6">
-                <Button variant="outline">
-                  <Icons.gitHub className="mr-2 h-4 w-4" />
-                  Github
-                </Button>
-                <Button variant="outline">
-                  <Icons.google className="mr-2 h-4 w-4" />
-                  Google
-                </Button>
-              </div>
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    Or continue with
-                  </span>
-                </div>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  disabled={isLoading}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  disabled={isLoading}
-                />
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-4">
-              <Button 
-                className="w-full" 
-                disabled={isLoading}
-                onClick={onSubmit}
-              >
-                {isLoading && (
-                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+            <form onSubmit={onSubmit}>
+              <CardContent className="grid gap-4">
+                {error && (
+                  <div className="bg-destructive/15 text-destructive text-sm p-2 rounded-md">
+                    {error}
+                  </div>
                 )}
-                Sign In
-              </Button>
-              <div className="text-sm text-muted-foreground text-center">
-                Don't have an account?{" "}
-                <Link
-                  href="/register"
-                  className="text-primary underline-offset-4 hover:underline"
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="name@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    <Link 
+                      href="/forgot-password" 
+                      className="text-sm text-primary underline-offset-4 hover:underline"
+                    >
+                      Forgot password?
+                    </Link>
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading}
+                    required
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="flex flex-col gap-4">
+                <Button 
+                  type="submit"
+                  className="w-full" 
+                  disabled={isLoading}
                 >
-                  Sign up
-                </Link>
-              </div>
-            </CardFooter>
+                  {isLoading && (
+                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Sign In
+                </Button>
+                <div className="text-sm text-muted-foreground text-center">
+                  Don't have an account?{" "}
+                  <Link
+                    href="/register"
+                    className="text-primary underline-offset-4 hover:underline"
+                  >
+                    Sign up
+                  </Link>
+                </div>
+              </CardFooter>
+            </form>
           </Card>
         </div>
       </div>

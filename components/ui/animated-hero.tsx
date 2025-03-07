@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { MoveRight, PhoneCall } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 function Hero() {
   const [titleNumber, setTitleNumber] = useState(0);
@@ -69,9 +70,21 @@ function Hero() {
             <Button size="lg" className="gap-4" variant="outline">
               Jump on a call <PhoneCall className="w-4 h-4" />
             </Button>
-            <Button size="lg" className="gap-4">
-              Sign up here <MoveRight className="w-4 h-4" />
+            <Button size="lg" className="gap-4" asChild>
+              <Link href="/register">
+                Sign up here <MoveRight className="w-4 h-4" />
+              </Link>
             </Button>
+          </div>
+          <div className="flex flex-col items-center space-y-4 text-center">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">
+                Already have an account? <Link href="/login" className="underline hover:text-primary">Log in</Link>
+              </p>
+              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl md:text-6xl/none">
+                Unify Your Marketing Communications
+              </h1>
+            </div>
           </div>
         </div>
       </div>
