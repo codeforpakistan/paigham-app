@@ -35,6 +35,8 @@ export async function checkDatabaseTables() {
       .from('email_templates')
       .select('id')
       .limit(1);
+
+    console.log('emailTemplates', emailTemplates)
       
     if (emailTemplatesError) {
       console.error('Error checking email_templates table:', emailTemplatesError);
@@ -49,6 +51,8 @@ export async function checkDatabaseTables() {
       .from('campaigns')
       .select('id')
       .limit(1);
+
+    console.log('campaigns', campaigns)
       
     if (campaignsError) {
       console.error('Error checking campaigns table:', campaignsError);
@@ -63,6 +67,8 @@ export async function checkDatabaseTables() {
       .from('company_settings')
       .select('id')
       .limit(1);
+
+    console.log('companySettings', companySettings)
       
     if (companySettingsError) {
       console.error('Error checking company_settings table:', companySettingsError);

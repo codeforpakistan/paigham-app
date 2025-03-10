@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import { User } from '@supabase/supabase-js';
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 export type AuthUser = User;
@@ -155,18 +155,20 @@ export async function createClient() {
         get(name: string) {
           return cookieStore.get(name)?.value
         },
-        set(name: string, value: string, options: any) {
+        set(name: string, value: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value, ...options })
-          } catch (error) {
-            // Handle cookies in middleware
+          } catch (_) {
+            // Handle cookies in middleware, ignore error
+            console.error('Error setting cookie:', name, value, options)
           }
         },
-        remove(name: string, options: any) {
+        remove(name: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value: '', ...options })
-          } catch (error) {
-            // Handle cookies in middleware
+          } catch (_) {
+            // Handle cookies in middleware, ignore error
+            console.error('Error removing cookie:', name, options)
           }
         },
       },
