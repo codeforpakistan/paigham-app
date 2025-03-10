@@ -1,5 +1,7 @@
 import { supabase } from './supabase';
 import { User } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
 export type AuthUser = User;
 
@@ -140,4 +142,34 @@ export async function updatePassword(password: string) {
     console.error('Error updating password:', error);
     throw error;
   }
+}
+
+export async function createClient() {
+  const cookieStore = cookies()
+
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+        set(name: string, value: string, options: any) {
+          try {
+            cookieStore.set({ name, value, ...options })
+          } catch (error) {
+            // Handle cookies in middleware
+          }
+        },
+        remove(name: string, options: any) {
+          try {
+            cookieStore.set({ name, value: '', ...options })
+          } catch (error) {
+            // Handle cookies in middleware
+          }
+        },
+      },
+    }
+  )
 } 

@@ -1,7 +1,6 @@
 "use client"
 
 import Link from 'next/link'
-import { Button } from './ui/button'
 import { ArrowRight } from 'lucide-react'
 
 export default function Cta() {
@@ -18,11 +17,7 @@ export default function Cta() {
             </p>
           </div>
           <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
-            <Link href="/register">
-              <Button size="lg" className="gap-2">
-                Get Started
-                <ArrowRight className="h-4 w-4" />
-              </Button>
+            <Link href="/auth/register">
             </Link>
           </div>
         </div>
