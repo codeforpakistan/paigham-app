@@ -199,19 +199,32 @@ export function Campaigns({ showNewCampaign, onClose }: CampaignsProps) {
       console.log('Campaign created:', campaign)
 
       // Start processing the campaign
+      console.log('Starting campaign processing...')
+      console.log('Session state:', {
+        exists: !!session,
+        company_id: session.company_id,
+        user_id: session.user?.id
+      })
+
       const response = await fetch('/api/campaigns/process', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Important: Include credentials
         body: JSON.stringify({
           campaignId: campaign.id
         })
       })
 
       if (!response.ok) {
-        throw new Error('Failed to start campaign processing')
+        const errorData = await response.json()
+        console.error('Campaign processing error response:', errorData)
+        throw new Error(errorData.error || 'Failed to start campaign processing')
       }
+
+      const result = await response.json()
+      console.log('Campaign processing started:', result)
 
       toast.success('Campaign created and started processing')
       onClose?.()

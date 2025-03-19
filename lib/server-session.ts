@@ -1,36 +1,58 @@
 import { cookies } from 'next/headers'
-import type { SessionData } from './session'
+import { SessionData } from './session'
 
-const SESSION_COOKIE_NAME = 'paigham_session'
+export const SESSION_COOKIE_NAME = 'paigham_session'
 
-export async function getServerSession(req?: Request): Promise<SessionData | null> {
-  // If Request object is provided (middleware), use it
-  if (req) {
-    const cookieHeader = req.headers.get('cookie')
-    if (!cookieHeader) return null
-
-    const sessionCookie = cookieHeader
-      .split('; ')
-      .find(row => row.startsWith(`${SESSION_COOKIE_NAME}=`))
-
-    if (!sessionCookie) return null
-
-    try {
-      return JSON.parse(decodeURIComponent(sessionCookie.split('=')[1])) as SessionData
-    } catch {
-      return null
-    }
-  }
-
-  // Use next/headers (only in server components)
+export function getServerSession(): SessionData | null {
   try {
     const cookieStore = cookies()
     const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)
+    
+    if (!sessionCookie?.value) {
+      console.log('No session cookie found')
+      return null
+    }
 
-    if (!sessionCookie?.value) return null
+    const sessionData = JSON.parse(sessionCookie.value)
+    console.log('Session data parsed:', {
+      user_id: sessionData.user?.id,
+      company_id: sessionData.company_id,
+      has_access_token: !!sessionData.access_token
+    })
 
-    return JSON.parse(sessionCookie.value) as SessionData
-  } catch {
+    return sessionData
+  } catch (error) {
+    console.error('Error parsing session cookie:', error)
     return null
+  }
+}
+
+export function setServerSession(sessionData: SessionData) {
+  try {
+    const cookieStore = cookies()
+    cookieStore.set({
+      name: SESSION_COOKIE_NAME,
+      value: JSON.stringify(sessionData),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7 // 7 days
+    })
+    return true
+  } catch (error) {
+    console.error('Error creating session:', error)
+    return false
+  }
+}
+
+export function deleteServerSession() {
+  try {
+    const cookieStore = cookies()
+    cookieStore.delete(SESSION_COOKIE_NAME)
+    return true
+  } catch (error) {
+    console.error('Error deleting session:', error)
+    return false
   }
 } 

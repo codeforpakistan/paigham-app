@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
-import { createSession } from "@/lib/session"
+import { createSessionFromUser } from "@/lib/session"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -33,7 +33,7 @@ export default function LoginPage() {
       if (data?.user) {
         try {
           // Create our own session
-          await createSession(data.user, data.session?.access_token!)
+          await createSessionFromUser(data.user, data.session?.access_token!)
           toast.success("Logged in successfully")
           window.location.href = '/dashboard'
         } catch (error) {

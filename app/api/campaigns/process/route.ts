@@ -1,102 +1,134 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
-
-async function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
+import { sendBulkSMS } from '@/lib/sms'
+import { getServerSession } from '@/lib/server-session'
 
 export async function POST(request: Request) {
   try {
-    const { campaignId } = await request.json()
+    console.log('Starting campaign processing...')
+    
+    // Get session from cookie
+    const session = getServerSession()
+    console.log('Session details:', {
+      exists: !!session,
+      company_id: session?.company_id,
+      user_id: session?.user?.id
+    })
+    
+    if (!session?.company_id) {
+      console.error('No valid session or company_id found')
+      return NextResponse.json(
+        { error: 'Unauthorized - No valid session' },
+        { status: 401 }
+      )
+    }
 
-    // Get campaign details
+    const { campaignId } = await request.json()
+    console.log('Campaign ID:', campaignId)
+    
+    if (!campaignId) {
+      return NextResponse.json(
+        { error: 'Campaign ID is required' },
+        { status: 400 }
+      )
+    }
+
+    // Get campaign details with company_id check
     const { data: campaign, error: campaignError } = await supabase
       .from('campaigns')
-      .select('*, contact_lists(id)')
+      .select(`
+        *,
+        contact_list:contact_lists (
+          contacts (
+            phone
+          )
+        )
+      `)
       .eq('id', campaignId)
+      .eq('company_id', session.company_id)
       .single()
 
-    if (campaignError || !campaign) {
-      return NextResponse.json({ error: 'Campaign not found' }, { status: 404 })
+    if (campaignError) {
+      console.error('Campaign fetch error:', campaignError)
+      return NextResponse.json(
+        { error: 'Failed to fetch campaign' },
+        { status: 500 }
+      )
     }
 
-    // Get contacts for the campaign
-    const { data: contacts, error: contactsError } = await supabase
-      .from('contacts')
-      .select('*')
-      .eq('list_id', campaign.contact_lists.id)
-
-    if (contactsError) {
-      return NextResponse.json({ error: 'Failed to fetch contacts' }, { status: 500 })
+    if (!campaign) {
+      console.error('Campaign not found or unauthorized')
+      return NextResponse.json(
+        { error: 'Campaign not found or unauthorized' },
+        { status: 404 }
+      )
     }
+
+    console.log('Campaign found:', campaign.id)
 
     // Update campaign status to processing
-    await supabase
+    const { error: updateError } = await supabase
       .from('campaigns')
-      .update({
-        status: 'processing',
-        progress: 0,
-        sent_messages: 0,
-        failed_messages: 0
-      })
+      .update({ status: 'processing' })
       .eq('id', campaignId)
 
-    // Process each contact
-    let sent = 0
-    let failed = 0
-
-    for (const contact of contacts) {
-      try {
-        // Replace variables in message template
-        let message = campaign.message_template
-        Object.entries(contact).forEach(([key, value]) => {
-          message = message.replace(new RegExp(`{{${key}}}`, 'g'), value as string)
-        })
-
-        // TODO: Integrate with actual messaging service
-        // For now, simulate message sending with a delay
-        await sleep(500)
-
-        // Random success/failure for demonstration
-        if (Math.random() > 0.1) {
-          sent++
-        } else {
-          failed++
-          console.error(`Failed to send message to ${contact.phone}`)
-        }
-
-        // Update progress
-        const progress = Math.round(((sent + failed) / contacts.length) * 100)
-        await supabase
-          .from('campaigns')
-          .update({
-            progress,
-            sent_messages: sent,
-            failed_messages: failed
-          })
-          .eq('id', campaignId)
-      } catch (error) {
-        failed++
-        console.error(`Error processing contact ${contact.id}:`, error)
-      }
+    if (updateError) {
+      console.error('Failed to update campaign status:', updateError)
+      return NextResponse.json(
+        { error: 'Failed to update campaign status' },
+        { status: 500 }
+      )
     }
 
-    // Update final status
-    await supabase
+    // Get all contacts from the contact list
+    const contacts = campaign.contact_list.contacts
+    console.log(`Found ${contacts.length} contacts to process`)
+
+    // Process the campaign
+    const results = await sendBulkSMS(
+      contacts,
+      campaign.message_template,
+      async (progress) => {
+        console.log(`Campaign progress: ${progress}%`)
+        // Update campaign progress
+        await supabase
+          .from('campaigns')
+          .update({ progress })
+          .eq('id', campaignId)
+      }
+    )
+
+    console.log('Campaign processing results:', results)
+
+    // Update campaign with final results
+    const { error: finalUpdateError } = await supabase
       .from('campaigns')
       .update({
-        status: failed === contacts.length ? 'failed' : 'completed',
+        status: results.success ? 'completed' : 'failed',
+        sent_messages: results.sent,
+        failed_messages: results.failed,
         progress: 100
       })
       .eq('id', campaignId)
 
+    if (finalUpdateError) {
+      console.error('Failed to update final campaign status:', finalUpdateError)
+      return NextResponse.json(
+        { error: 'Failed to update final campaign status' },
+        { status: 500 }
+      )
+    }
+
     return NextResponse.json({
       success: true,
-      sent,
-      failed
+      message: `Campaign processed: ${results.sent} sent, ${results.failed} failed`,
+      results
     })
   } catch (error) {
     console.error('Campaign processing error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Failed to process campaign' },
+      { status: 500 }
+    )
   }
 } 

@@ -31,7 +31,8 @@ export function getSessionCookie(): SessionData | null {
 
   try {
     return JSON.parse(cookie.split('=')[1])
-  } catch {
+  } catch (error) {
+    console.error('Error parsing session cookie:', error)
     return null
   }
 }
@@ -42,7 +43,7 @@ export function clearSessionCookie() {
   document.cookie = `${SESSION_COOKIE_NAME}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`
 }
 
-export async function createSession(user: User, access_token: string) {
+export async function createSessionFromUser(user: User, access_token: string) {
   // Get user profile with company info
   const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/users/profile`, {
     headers: {
