@@ -17,7 +17,7 @@ export async function middleware(req: NextRequest) {
   }
 
   // Get session using the request object
-  const session = await getServerSession(req)
+  const session = await getServerSession()
 
   // Forward to dashboard if logged in and trying to access auth pages
   if (session && pathname.startsWith('/auth')) {

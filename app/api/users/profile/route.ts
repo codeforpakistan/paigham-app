@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
+// Opt out of static optimization for this route
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: Request) {
   try {
     // Get the bearer token from the Authorization header

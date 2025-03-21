@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import {
   Table,
@@ -33,7 +32,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
 import { toast } from "sonner"
 import {
-  Send,
   MessageSquare,
   Users,
   Variable,
@@ -70,7 +68,6 @@ interface CampaignsProps {
 }
 
 export function Campaigns({ showNewCampaign, onClose }: CampaignsProps) {
-  const router = useRouter()
   const session = getSessionCookie()
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [contactLists, setContactLists] = useState<ContactList[]>([])

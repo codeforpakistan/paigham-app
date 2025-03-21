@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import {
   Table,
@@ -23,7 +22,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
-import { Upload, FileSpreadsheet, Trash2, Users, Eye, Loader2 } from "lucide-react"
+import { FileSpreadsheet, Trash2, Users, Loader2 } from "lucide-react"
 import { getSessionCookie } from "@/lib/session"
 import { supabase } from "@/lib/supabase"
 import Papa from 'papaparse'
@@ -47,7 +46,6 @@ interface ContactListsProps {
 }
 
 export function ContactLists({ onUploadStateChange }: ContactListsProps) {
-  const router = useRouter()
   const session = getSessionCookie()
   const [lists, setLists] = useState<ContactList[]>([])
   const [isLoading, setIsLoading] = useState(true)

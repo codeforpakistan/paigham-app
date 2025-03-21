@@ -1,7 +1,5 @@
-import { toast } from 'sonner'
-import { v4 as uuidv4 } from 'uuid'
 
-const SMS_API_URL = 'http://l337.aliirz.com:8000/sms'
+const SMS_API_URL = process.env.SMS_API_URL
 
 interface SendSMSResponse {
   success: boolean

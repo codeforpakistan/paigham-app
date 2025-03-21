@@ -33,9 +33,13 @@ export default function LoginPage() {
       if (data?.user) {
         try {
           // Create our own session
-          await createSessionFromUser(data.user, data.session?.access_token!)
-          toast.success("Logged in successfully")
-          window.location.href = '/dashboard'
+          if (data.session?.access_token) {
+            await createSessionFromUser(data.user, data.session.access_token)
+            toast.success("Logged in successfully")
+            window.location.href = '/dashboard'
+          } else {
+            toast.error("Authentication token not found")
+          }
         } catch (error) {
           console.error('Session creation error:', error)
           toast.error("Failed to establish session")
@@ -43,9 +47,10 @@ export default function LoginPage() {
       } else {
         toast.error("No user data received")
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Login error:", error)
-      toast.error(error.message || "Failed to login. Please check your credentials.")
+      const errorMessage = error instanceof Error ? error.message : "Failed to login. Please check your credentials."
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }

@@ -160,7 +160,7 @@ export async function createClient() {
             cookieStore.set({ name, value, ...options })
           } catch (_) {
             // Handle cookies in middleware, ignore error
-            console.error('Error setting cookie:', name, value, options)
+            console.error('Error setting cookie:', name, value, options, _)
           }
         },
         remove(name: string, options: CookieOptions) {
@@ -168,7 +168,7 @@ export async function createClient() {
             cookieStore.set({ name, value: '', ...options })
           } catch (_) {
             // Handle cookies in middleware, ignore error
-            console.error('Error removing cookie:', name, options)
+            console.error('Error removing cookie:', name, options, _)
           }
         },
       },
