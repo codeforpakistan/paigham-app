@@ -13,12 +13,12 @@ export default function Header() {
         
         <nav className="flex items-center gap-4">
           <Link 
-            href="/login"
+            href="/auth/login"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
             Log in
           </Link>
-          <Link href="/register">
+          <Link href="/auth/register">
             <Button variant="secondary" size="sm">
               Sign up
             </Button>
