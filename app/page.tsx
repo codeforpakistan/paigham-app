@@ -2,7 +2,7 @@
 import Header from '@/components/header'
 import { Hero } from "@/components/ui/animated-hero"
 import Features from '@/components/features'
-import Testimonials from '@/components/testimonials'
+// import Testimonials from '@/components/testimonials'
 import Cta from '@/components/cta'
 import Footer from '@/components/footer'
 
